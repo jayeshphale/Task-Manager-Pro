@@ -17,41 +17,39 @@ app.use(helmet());
 // Logging Middleware
 app.use(morgan("dev"));
 
+// Debug: log incoming origin for troubleshooting CORS in production
+app.use((req, res, next) => {
+  console.log("Incoming Origin:", req.headers.origin);
+  next();
+});
+
 // CORS must be applied before body parsers and routes
-const allowedOrigins = new Set([
+const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://task-manager-pro-inky.vercel.app",
-]);
+];
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow non-browser requests or same-origin local calls
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.has(origin)) {
+      if (allowedOrigins.indexOf(origin) !== -1) {
         return callback(null, true);
       }
 
-      return callback(new Error("CORS policy does not allow this origin"));
+      return callback(new Error("Not allowed by CORS"));
     },
-    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-    optionsSuccessStatus: 200,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-app.options("*", cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    return allowedOrigins.has(origin)
-      ? callback(null, true)
-      : callback(new Error("CORS policy does not allow this origin"));
-  },
-  credentials: true,
-}));
+// Ensure preflight requests are handled
+app.options("*", cors());
 
 // Parse JSON
 app.use(express.json());
