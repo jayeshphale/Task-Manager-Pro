@@ -96,9 +96,14 @@ const Dashboard = () => {
     }
   };
 
-  const handleToggle = async (id) => {
+  const handleToggle = async (id, currentStatus) => {
     try {
-      await API.patch(`/api/tasks/${id}/toggle`);
+      const updatedStatus = currentStatus === "pending" ? "completed" : "pending";
+
+      await API.patch(`/api/tasks/${id}`, {
+        status: updatedStatus,
+      });
+
       fetchTasks();
     } catch {
       toast.error("Status update failed");

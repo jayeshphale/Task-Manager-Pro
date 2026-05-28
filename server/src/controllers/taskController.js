@@ -121,6 +121,9 @@ export const deleteTask = asyncHandler(async (req, res) => {
 
 // TOGGLE TASK STATUS
 export const toggleTaskStatus = asyncHandler(async (req, res) => {
+  console.log("Updating task:", req.params.id);
+  console.log("Request body:", req.body);
+
   const task = await Task.findById(req.params.id);
 
   if (!task) {
@@ -129,8 +132,18 @@ export const toggleTaskStatus = asyncHandler(async (req, res) => {
     throw new Error("Task not found");
   }
 
-  task.status =
-    task.status === "pending" ? "completed" : "pending";
+  // Ownership check
+  if (task.user.toString() !== req.user._id.toString()) {
+    res.status(403);
+
+    throw new Error("Unauthorized access");
+  }
+
+  if (req.body.status) {
+    task.status = req.body.status;
+  } else {
+    task.status = task.status === "pending" ? "completed" : "pending";
+  }
 
   await task.save();
 

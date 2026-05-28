@@ -57,7 +57,7 @@ const TaskCard = ({
 
         <div className="flex items-center justify-end gap-3 sm:flex-col sm:justify-start">
           <button
-            onClick={() => onToggle(task._id)}
+            onClick={() => onToggle(task._id, task.status)}
             aria-label={
               task.status === "completed"
                 ? "Mark as pending"
