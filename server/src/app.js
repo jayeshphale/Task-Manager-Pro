@@ -11,69 +11,73 @@ import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
 const app = express();
 
-// Security Middleware
+// ========================================
+// MIDDLEWARE STACK (Order is CRITICAL)
+// ========================================
+
+// 1. Security Middleware - Add secure headers
 app.use(helmet());
 
-// Logging Middleware
+// 2. Logging Middleware - Log HTTP requests
 app.use(morgan("dev"));
 
-// Debug: log incoming origin for troubleshooting CORS in production
-app.use((req, res, next) => {
-  console.log("Incoming Origin:", req.headers.origin);
-  next();
-});
-
-// CORS must be applied before body parsers and routes
+// 3. CORS Configuration - Production-ready
+// Allowed origins for cross-origin requests
 const allowedOrigins = [
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "https://task-manager-pro-inky.vercel.app",
+  "http://localhost:5173",      // Local dev - client
+  "http://127.0.0.1:5173",      // Local dev - alternative
+  "https://task-manager-pro-inky.vercel.app", // Production frontend
 ];
 
-const debugCors = process.env.DEBUG_CORS === "true";
+// CORS Options - Must support preflight OPTIONS requests
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Log the incoming origin for debugging
+    console.log("[CORS] Incoming origin:", origin || "no-origin");
 
-if (debugCors) {
-  console.warn("DEBUG_CORS enabled: allowing all origins for debugging");
-  app.use(
-    cors({
-      origin: true,
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-    })
-  );
-} else {
-  app.use(
-    cors({
-      origin: function (origin, callback) {
-        console.log("CORS check origin:", origin);
-        // allow requests with no origin (like mobile apps or curl)
-        if (!origin) return callback(null, true);
+    // Allow requests with no origin (mobile apps, curl requests, etc.)
+    if (!origin) {
+      return callback(null, true);
+    }
 
-        if (allowedOrigins.indexOf(origin) !== -1) {
-          return callback(null, true);
-        }
+    // Check if origin is in the allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-        console.warn("Blocked CORS origin:", origin);
-        return callback(new Error("Not allowed by CORS"));
-      },
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-    })
-  );
+    // Origin not allowed - log and reject
+    console.warn("[CORS] Rejected origin:", origin);
+    return callback(new Error(`CORS policy: Origin '${origin}' not allowed`));
+  },
+  
+  // CRITICAL: Allow credentials (cookies, authorization headers)
+  credentials: true,
+  
+  // Allowed HTTP methods for preflight and actual requests
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  
+  // Allowed request headers that can be sent by the client
+  allowedHeaders: ["Content-Type", "Authorization"],
+  
+  // HTTP status code for successful OPTIONS requests
+  optionsSuccessStatus: 200,
+  
+  // Max age for preflight cache (in seconds)
+  maxAge: 3600,
+};
 
-  // Ensure preflight requests are handled
-  app.options("*", cors());
-}
+// Apply CORS middleware to ALL routes
+app.use(cors(corsOptions));
 
-// Parse JSON
+// 4. Preflight handler - MUST come after app.use(cors())
+// This handles OPTIONS requests for all routes
+app.options("*", cors(corsOptions));
+
+// 5. Body Parser Middleware - Parse incoming JSON/form data
 app.use(express.json());
-
-// Parse Form Data
 app.use(express.urlencoded({ extended: true }));
 
-// Cookie Parser
+// 6. Cookie Parser Middleware - Parse cookies
 app.use(cookieParser());
 
 // Health Route
