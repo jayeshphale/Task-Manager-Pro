@@ -73,6 +73,29 @@ app.use(cors(corsOptions));
 // This handles OPTIONS requests for all routes
 app.options("*", cors(corsOptions));
 
+// 4.a Safety: ensure CORS headers are present on error responses or non-cors flows.
+// This middleware sets the Access-Control-* headers when the origin is allowed or
+// when DEBUG_CORS is enabled. It prevents the browser from rejecting responses
+// that otherwise would lack CORS headers (for example, when an error occurs).
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const debugCorsEnabled = process.env.DEBUG_CORS === "true";
+
+  if (!origin && !debugCorsEnabled) return next();
+
+  if (debugCorsEnabled || (origin && allowedOrigins.includes(origin))) {
+    res.setHeader("Access-Control-Allow-Origin", debugCorsEnabled ? "*" : origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    );
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  }
+
+  return next();
+});
+
 // 5. Body Parser Middleware - Parse incoming JSON/form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
