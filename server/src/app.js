@@ -30,26 +30,42 @@ const allowedOrigins = [
   "https://task-manager-pro-inky.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
+const debugCors = process.env.DEBUG_CORS === "true";
 
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        return callback(null, true);
-      }
+if (debugCors) {
+  console.warn("DEBUG_CORS enabled: allowing all origins for debugging");
+  app.use(
+    cors({
+      origin: true,
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
+} else {
+  app.use(
+    cors({
+      origin: function (origin, callback) {
+        console.log("CORS check origin:", origin);
+        // allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
 
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+          return callback(null, true);
+        }
 
-// Ensure preflight requests are handled
-app.options("*", cors());
+        console.warn("Blocked CORS origin:", origin);
+        return callback(new Error("Not allowed by CORS"));
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
+
+  // Ensure preflight requests are handled
+  app.options("*", cors());
+}
 
 // Parse JSON
 app.use(express.json());
