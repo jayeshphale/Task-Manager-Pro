@@ -1,5 +1,4 @@
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -9,8 +8,6 @@ import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
-
-dotenv.config();
 
 const app = express();
 
