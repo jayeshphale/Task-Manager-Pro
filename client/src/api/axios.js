@@ -1,6 +1,13 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const devFallbackUrl = "http://localhost:5000/api";
+const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === "development" ? devFallbackUrl : "");
+
+if (!baseURL && import.meta.env.MODE === "production") {
+  console.warn(
+    "VITE_API_URL is not defined. Set VITE_API_URL in your production environment so the frontend can reach the backend API."
+  );
+}
 
 const API = axios.create({
   baseURL,

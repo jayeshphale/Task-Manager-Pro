@@ -22,12 +22,16 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 // 3. CORS Configuration - Production-ready
-// Allowed origins for cross-origin requests
+// Allowed origins for cross-origin requests. Use CLIENT_URL or ALLOWED_ORIGINS in env when available.
 const allowedOrigins = [
+  ...(process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
+    : []),
+  process.env.CLIENT_URL,
   "http://localhost:5173",      // Local dev - client
   "http://127.0.0.1:5173",      // Local dev - alternative
   "https://task-manager-pro-inky.vercel.app", // Production frontend
-];
+].filter(Boolean);
 
 // CORS Options - Must support preflight OPTIONS requests
 const corsOptions = {

@@ -98,13 +98,28 @@ Make sure you have these installed:
 
 4. **Configure environment variables**
    
-   Create a `.env` file in the `server` directory:
-   ```
+   - Copy `server/.env.example` to `server/.env`
+   - Copy `client/.env.example` to `client/.env`
+   
+   Then update the values for your environment.
+
+   Example `server/.env`:
+   ```env
    PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/task-manager
+   MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/taskmanager?retryWrites=true&w=majority
    JWT_SECRET=your-secret-key-here
    NODE_ENV=development
+   CLIENT_URL=http://localhost:5173
+   DEBUG_CORS=true
    ```
+
+   Example `client/.env`:
+   ```env
+   VITE_API_URL=http://localhost:5000/api
+   NODE_ENV=production
+   ```
+
+   > Note: `.env` files are included in `.gitignore` and should not be committed.
 
 5. **Start the backend**
    ```bash
@@ -122,6 +137,18 @@ Make sure you have these installed:
 
 7. **Open in your browser**
    Navigate to `http://localhost:5173` and start managing your tasks!
+
+## Deployment Checklist
+
+- Ensure `MONGO_URI` is configured in your production host or deployment platform.
+- Ensure `JWT_SECRET` is set in production.
+- In production, set `VITE_API_URL` to your backend API URL, for example:
+  ```env
+  VITE_API_URL=https://your-backend-domain.com/api
+  ```
+- If deploying the backend to Render or another cloud provider, add your app's outbound IP or `0.0.0.0/0` to MongoDB Atlas Network Access while testing.
+- Add your frontend URL to `CLIENT_URL` and `ALLOWED_ORIGINS` if using strict CORS in production.
+- Disable `DEBUG_CORS` in production by setting it to `false` or removing it.
 
 ## Project Structure
 
