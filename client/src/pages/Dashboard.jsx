@@ -49,7 +49,7 @@ const Dashboard = () => {
     try {
       setLoading(true);
 
-      let url = `/tasks?page=${currentPage}&search=${search}`;
+      let url = `/api/tasks?page=${currentPage}&search=${search}`;
       if (status !== "all") {
         url += `&status=${status}`;
       }
@@ -72,10 +72,10 @@ const Dashboard = () => {
   const handleTaskSubmit = async (formData) => {
     try {
       if (editingTask) {
-        await API.put(`/tasks/${editingTask._id}`, formData);
+        await API.put(`/api/tasks/${editingTask._id}`, formData);
         toast.success("Task updated");
       } else {
-        await API.post("/tasks", formData);
+        await API.post("/api/tasks", formData);
         toast.success("Task created");
       }
       setModalOpen(false);
@@ -88,7 +88,7 @@ const Dashboard = () => {
 
   const handleDelete = async (id) => {
     try {
-      await API.delete(`/tasks/${id}`);
+      await API.delete(`/api/tasks/${id}`);
       toast.success("Task deleted");
       fetchTasks();
     } catch {
@@ -98,7 +98,7 @@ const Dashboard = () => {
 
   const handleToggle = async (id) => {
     try {
-      await API.patch(`/tasks/${id}/toggle`);
+      await API.patch(`/api/tasks/${id}/toggle`);
       fetchTasks();
     } catch {
       toast.error("Status update failed");

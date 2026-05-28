@@ -22,7 +22,7 @@ const AuthProvider = ({ children }) => {
         return;
       }
 
-      const { data } = await API.get("/auth/profile");
+      const { data } = await API.get("/api/auth/profile");
 
       setUser(data.user);
 
@@ -48,7 +48,7 @@ const AuthProvider = ({ children }) => {
     try {
 
       const { data } = await API.post(
-        "/auth/login",
+        "/api/auth/login",
         formData
       );
 
@@ -76,7 +76,7 @@ const AuthProvider = ({ children }) => {
     try {
 
       const { data } = await API.post(
-        "/auth/signup",
+        "/api/auth/signup",
         formData
       );
 
