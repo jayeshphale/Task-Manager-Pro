@@ -45,9 +45,14 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    // Origin not allowed - log and reject
+    // Origin not allowed - log and continue without setting CORS headers
+    // NOTE: we return `callback(null, false)` instead of an error so that
+    // Express does not treat this as a server error (HTTP 500). A 500 would
+    // cause the response to omit CORS headers entirely. Returning false lets
+    // the request continue so downstream middleware can handle the response
+    // (and our safety middleware can still set headers when appropriate).
     console.warn("[CORS] Rejected origin:", origin);
-    return callback(new Error(`CORS policy: Origin '${origin}' not allowed`));
+    return callback(null, false);
   },
   
   // CRITICAL: Allow credentials (cookies, authorization headers)
