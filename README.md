@@ -2,6 +2,10 @@
 
 A modern, full-stack task management application built with React and Node.js. TaskFlow helps teams and individuals organize their work, track progress, and stay productive without the clutter.
 
+## Live Demo
+- Frontend: https://task-manager-pro-mzkm.vercel.app/login
+- Backend API: https://task-manager-pro-34bl.onrender.com
+
 ## What Makes TaskFlow Different?
 
 Unlike bulky project management tools, TaskFlow focuses on simplicity and elegance. It's designed for teams that want to:
