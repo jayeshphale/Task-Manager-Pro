@@ -17,6 +17,42 @@ app.use(helmet());
 // Logging Middleware
 app.use(morgan("dev"));
 
+// CORS must be applied before body parsers and routes
+const allowedOrigins = new Set([
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://task-manager-pro-inky.vercel.app",
+]);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser requests or same-origin local calls
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS policy does not allow this origin"));
+    },
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
+
+app.options("*", cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    return allowedOrigins.has(origin)
+      ? callback(null, true)
+      : callback(new Error("CORS policy does not allow this origin"));
+  },
+  credentials: true,
+}));
+
 // Parse JSON
 app.use(express.json());
 
@@ -25,25 +61,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Cookie Parser
 app.use(cookieParser());
-
-// CORS
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g., curl, mobile apps)
-      if (!origin) return callback(null, true);
-
-      const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-      const alternateOrigin = clientUrl.replace("localhost", "127.0.0.1");
-      const allowedOrigins = new Set([clientUrl, alternateOrigin]);
-
-      if (allowedOrigins.has(origin)) return callback(null, true);
-
-      return callback(new Error("CORS policy does not allow this origin"));
-    },
-    credentials: true,
-  })
-);
 
 // Health Route
 app.get("/", (req, res) => {
