@@ -586,17 +586,3 @@ We'd love your help! Here's how to contribute:
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-## Questions & Support
-
-Have questions? Feel free to open an issue or reach out to the team. We're here to help!
-
----
-
-**Happy task managing!**
-
-Built with passion for productive teams everywhere.
